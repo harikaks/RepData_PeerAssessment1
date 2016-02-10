@@ -24,18 +24,18 @@ steps_per_day <- aggregate(steps ~ date, data, sum)
 hist(steps_per_day$steps, main = "Total Steps per Day", col="Green", xlab="No of Steps")
 
 
-rmean <- mean(steps_per_day$steps)
-rmedian <- median(steps_per_day$steps)
+Steps_mean <- mean(steps_per_day$steps)
+steps_median <- median(steps_per_day$steps)
 
 ```
 
 The mean is 
 ```{r,echo=FALSE} 
-rmean 
+Steps_mean 
 ``` 
 and the median is  
 ```{r,echo=FALSE}
-rmedian
+steps_median
 ```
 ## What is the average daily activity pattern?
 ```{r}
@@ -46,22 +46,27 @@ plot(steps_by_interval$interval,steps_by_interval$steps, type="l", xlab="Interva
 
 max_interval <-steps_by_interval[which.max(steps_by_interval$steps),1]
 ```
-Most Steps at:
+Most Steps at the interval:
 ```{r,echo=FALSE}
 max_interval
 ```
 ## Imputing missing values
 ```{r}
-
 numMissingValues <- length(which(is.na(data$steps)))
+```
+Number of missing values:
+```{r,echo=FALSE} 
+numMissingValues        
+```
+```{r}
 DataImputed <- data
 DataImputed$steps <- impute(data$steps, fun=mean)
 Imputed_steps_per_day <- aggregate(steps ~ date, DataImputed, sum)
 hist(Imputed_steps_per_day$steps, main = paste("Total Steps per Day"), col="Green", xlab="No of Steps")
 Imputedmean <- mean(Imputed_steps_per_day$steps)
 Imputedmedian <- median(Imputed_steps_per_day$steps)
-meandiff<-Imputedmean-rmean
-mediandiff<-Imputedmedian-rmedian
+meandiff<-Imputedmean-Steps_mean
+mediandiff<-Imputedmedian-steps_median
 stepsdiff<-sum(Imputed_steps_per_day$steps)-sum(steps_per_day$steps)
 ```
 The Imputedmean is 
@@ -86,14 +91,16 @@ stepsdiff
 ```
 ## Are there differences in activity patterns between weekdays and weekends?
 ```{r,echo=TRUE}
+weekdays <- c("Monday", "Tuesday", "Wednesday", "Thursday", 
+              "Friday")
+DataImputed$week = as.factor(ifelse(is.element(weekdays(as.Date(DataImputed$date)),weekdays), "Weekday", "Weekend"))
 
-#DataImputed$week <-  ifelse(as.POSIXlt(DataImputed$date)$wday %in% c(0,6), 'weekend', 'weekday')
-#newStepsPerDay$WeekDay <- ifelse(weekdays(as.Date(newStepsPerDay$date))==c("Sunday"), "weekend", #"weekday") 
-DataImputed$week <-ifelse(weekdays(as.Date(DataImputed$date))==c("Sunday"), "weekend", "weekday") 
 AverageDataImputed <- aggregate(steps ~ interval + week, data=DataImputed, mean)
 ggplot(AverageDataImputed, aes(interval, steps)) + 
     geom_line(color="blue") + 
     facet_wrap(~ week,nrow=2,ncol=1) +
     xlab("5-minute interval") + 
-    ylab("Number of steps")+theme_light()
+    ylab("Number of steps")+theme_gray()
 ```
+
+ 
